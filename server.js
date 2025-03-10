@@ -6,9 +6,7 @@ const cors = require('cors');
 const bcrypt = require('bcrypt')
 const path = require('path')
 let PORT = 6060
-app.use(cors({
-    origin: ['https://n0wdj8fl-5173.inc1.devtunnels.ms', 'http://localhost:5173','https://electrocartatweb3.netlify.app']
-}));
+app.use(cors());
 app.use(express.urlencoded({ extended: true }))
 app.use(express.static('.'))
 app.use(express.json())
