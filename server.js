@@ -7,7 +7,7 @@ const bcrypt = require('bcrypt')
 const path = require('path')
 let PORT = 6060
 app.use(cors({
-    origin: 'https://electrocartatweb3.netlify.app/'
+    origin: 'https://electrocartatweb3.netlify.app'
 }));
 app.use(express.urlencoded({ extended: true }))
 app.use(express.static('.'))
