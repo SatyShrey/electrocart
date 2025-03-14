@@ -1,4 +1,4 @@
-
+// apple airpod
 export const pArray= [
   {
     id: 1,
