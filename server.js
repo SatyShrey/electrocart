@@ -5,6 +5,7 @@ const app = express();
 const cors = require('cors');
 const bcrypt = require('bcrypt')
 const path = require('path')
+const axios = require('axios');
 
 const { v4: uuidv4 } = require('uuid');
 const crypto = require('crypto');
@@ -120,13 +121,14 @@ const MERCHANT_ID="PGTESTPAYUAT86"
 const MERCHANT_BASE_URL="https://api-preprod.phonepe.com/apis/pg-sandbox/pg/v1/pay"
 const MERCHANT_STATUS_URL="https://api-preprod.phonepe.com/apis/pg-sandbox/pg/v1/status"
 
+
 const redirectUrl="https://electrocart-0x3v.onrender.com/status"
-
-
 const successUrl="https://electrocartatweb3.netlify.app/payment-success"
-
 const failureUrl="https://electrocartatweb3.netlify.app/payment-failure"
 
+// const redirectUrl="http://localhost:6060/status"
+// const successUrl="http://localhost:5173/payment-success"
+// const failureUrl="http://localhost:5173/payment-failure"
 
 
 app.post('/create-order', async (req, res) => {
@@ -169,7 +171,7 @@ app.post('/create-order', async (req, res) => {
     try {
         
         const response = await axios.request(option);
-        console.log(response.data.data.instrumentResponse.redirectInfo.url)
+        //console.log(response.data.data.instrumentResponse.redirectInfo.url)
          res.status(200).json({msg : "OK", url: response.data.data.instrumentResponse.redirectInfo.url})
     } catch (error) {
         console.log("error in payment", error)
