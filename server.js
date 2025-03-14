@@ -115,7 +115,7 @@ mongoClient.connect(mongoUrl).then(clientObject => {
 
 
 const MERCHANT_KEY = "96434309-7796-489d-8924-ab56988a6076"
-const MERCHANT_ID = "PGTESTPAYUAT"
+const MERCHANT_ID = "PGTESTPAYUAT86"
 
 const MERCHANT_BASE_URL = "https://api-preprod.phonepe.com/apis/pg-sandbox/pg/v1/pay"
 const MERCHANT_STATUS_URL = "https://api-preprod.phonepe.com/apis/pg-sandbox/pg/v1/status"
