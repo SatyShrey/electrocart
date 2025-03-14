@@ -125,9 +125,9 @@ const redirectUrl = "https://electrocart-0x3v.onrender.com/status"
 const successUrl = "https://electrocartatweb3.netlify.app/payment-success"
 const failureUrl = "https://electrocartatweb3.netlify.app/payment-failure"
 
-// const redirectUrl="http://localhost:6060/status"
-// const successUrl="http://localhost:5173/payment-success"
-// const failureUrl="http://localhost:5173/payment-failure"
+// const redirectUrl="http://localhost:6060/status";
+// const successUrl="http://localhost:5173/payment-success";
+// const failureUrl="http://localhost:5173/payment-failure";
 
 
 app.post('/create-order', async (req, res) => {
@@ -203,7 +203,7 @@ app.post('/status', async (req, res) => {
         if (response.data.success === true) {
             return res.redirect(successUrl+"/"+merchantTransactionId)
         } else {
-            return res.redirect(failureUrl)
+            return res.redirect(failureUrl+"/"+merchantTransactionId)
         }
     })
 });
