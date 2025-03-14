@@ -1,5 +1,4 @@
 /* eslint-disable no-undef */
-
 const express = require('express');
 const app = express();
 const cors = require('cors');
@@ -12,7 +11,7 @@ const crypto = require('crypto');
 
 let PORT = 6060
 app.use(cors({
-    origin: ['https://electrocartatweb3.netlify.app','http://localhost:5173','https://n0wdj8fl-5173.inc1.devtunnels.ms']
+    origin: ['https://electrocartatweb3.netlify.app', 'http://localhost:5173', 'https://n0wdj8fl-5173.inc1.devtunnels.ms']
 }));
 app.use(express.urlencoded({ extended: true }))
 app.use(express.static('.'))
@@ -39,17 +38,17 @@ app.get('/products', (req, res) => {
 mongoClient.connect(mongoUrl).then(clientObject => {
     const db = clientObject.db('electrokart');
     //create user
-    app.post('/createuser',(req, res) => {
-       db.collection('users').findOne({email:req.body.email}).then(async(data)=>{
-        if(data){res.send('User already exists. Plese use different email')}
-        else{
-            const hashPassword = await bcrypt.hash(req.body.password, 10)
-            const user = { ...req.body, password: hashPassword }
-            db.collection('users').insertOne(user)
-            res.send('User created succesfully');
-            res.end()
-        }
-       })
+    app.post('/createuser', (req, res) => {
+        db.collection('users').findOne({ email: req.body.email }).then(async (data) => {
+            if (data) { res.send('User already exists. Plese use different email') }
+            else {
+                const hashPassword = await bcrypt.hash(req.body.password, 10)
+                const user = { ...req.body, password: hashPassword }
+                db.collection('users').insertOne(user)
+                res.send('User created succesfully');
+                res.end()
+            }
+        })
     });
 
     //get user data
@@ -83,10 +82,10 @@ mongoClient.connect(mongoUrl).then(clientObject => {
 
     //remove from cart
     app.put('/removefromcart/:uid/:pid', async (req, res) => {
-        let cartItems=req.body
-        let index=cartItems.findIndex(object=>object.id==req.params.pid)
-        if(index !== -1){
-            cartItems.splice(index,1)
+        let cartItems = req.body
+        let index = cartItems.findIndex(object => object.id == req.params.pid)
+        if (index !== -1) {
+            cartItems.splice(index, 1)
         }
         db.collection('users').updateOne({ email: req.params.uid }, { $set: { cartItems: cartItems } }).then(() => {
             db.collection('users').findOne({ email: req.params.uid }).then((user) => {
@@ -95,16 +94,16 @@ mongoClient.connect(mongoUrl).then(clientObject => {
         })
     });
     //delete user
-    app.delete('/deleteuser/:email',(req,res)=>{
-        db.collection('users').deleteOne({email:req.params.email}).then(()=>{
-            res.send();res.end()
+    app.delete('/deleteuser/:email', (req, res) => {
+        db.collection('users').deleteOne({ email: req.params.email }).then(() => {
+            res.send(); res.end()
         })
     });
     //remove from whitelist
-    app.put('/whitelist/:uid',(req,res)=>{
-        db.collection('users').updateOne({email:req.params.uid},{$set:{wishlist:req.body}}).then(()=>{
-            db.collection('users').findOne({email:req.params.uid}).then((user)=>{
-                res.send(user);res.end();
+    app.put('/whitelist/:uid', (req, res) => {
+        db.collection('users').updateOne({ email: req.params.uid }, { $set: { wishlist: req.body } }).then(() => {
+            db.collection('users').findOne({ email: req.params.uid }).then((user) => {
+                res.send(user); res.end();
             })
         })
     })
@@ -115,16 +114,16 @@ mongoClient.connect(mongoUrl).then(clientObject => {
 //////////////////
 
 
-const MERCHANT_KEY="96434309-7796-489d-8924-ab56988a6076"
-const MERCHANT_ID="PGTESTPAYUAT86"
+const MERCHANT_KEY = "96434309-7796-489d-8924-ab56988a6076"
+const MERCHANT_ID = "PGTESTPAYUAT"
 
-const MERCHANT_BASE_URL="https://api-preprod.phonepe.com/apis/pg-sandbox/pg/v1/pay"
-const MERCHANT_STATUS_URL="https://api-preprod.phonepe.com/apis/pg-sandbox/pg/v1/status"
+const MERCHANT_BASE_URL = "https://api-preprod.phonepe.com/apis/pg-sandbox/pg/v1/pay"
+const MERCHANT_STATUS_URL = "https://api-preprod.phonepe.com/apis/pg-sandbox/pg/v1/status"
 
 
-const redirectUrl="https://electrocart-0x3v.onrender.com/status"
-const successUrl="https://electrocartatweb3.netlify.app/payment-success"
-const failureUrl="https://electrocartatweb3.netlify.app/payment-failure"
+const redirectUrl = "https://electrocart-0x3v.onrender.com/status"
+const successUrl = "https://electrocartatweb3.netlify.app/payment-success"
+const failureUrl = "https://electrocartatweb3.netlify.app/payment-failure"
 
 // const redirectUrl="http://localhost:6060/status"
 // const successUrl="http://localhost:5173/payment-success"
@@ -133,15 +132,15 @@ const failureUrl="https://electrocartatweb3.netlify.app/payment-failure"
 
 app.post('/create-order', async (req, res) => {
 
-    const {name, mobileNumber, amount} = req.body;
+    const { name, mobileNumber, amount } = req.body;
     const orderId = uuidv4()
 
     //payment
     const paymentPayload = {
-        merchantId : MERCHANT_ID,
+        merchantId: MERCHANT_ID,
         merchantUserId: name,
         mobileNumber: mobileNumber,
-        amount : amount * 100,
+        amount: amount * 100,
         merchantTransactionId: orderId,
         redirectUrl: `${redirectUrl}/?id=${orderId}`,
         redirectMode: 'POST',
@@ -152,30 +151,30 @@ app.post('/create-order', async (req, res) => {
 
     const payload = Buffer.from(JSON.stringify(paymentPayload)).toString('base64')
     const keyIndex = 1
-    const string  = payload + '/pg/v1/pay' + MERCHANT_KEY
+    const string = payload + '/pg/v1/pay' + MERCHANT_KEY
     const sha256 = crypto.createHash('sha256').update(string).digest('hex')
     const checksum = sha256 + '###' + keyIndex
 
     const option = {
         method: 'POST',
-        url:MERCHANT_BASE_URL,
+        url: MERCHANT_BASE_URL,
         headers: {
-            accept : 'application/json',
+            accept: 'application/json',
             'Content-Type': 'application/json',
             'X-VERIFY': checksum
         },
-        data :{
-            request : payload
+        data: {
+            request: payload
         }
     }
     try {
-        
+
         const response = await axios.request(option);
         //console.log(response.data.data.instrumentResponse.redirectInfo.url)
-         res.status(200).json({msg : "OK", url: response.data.data.instrumentResponse.redirectInfo.url})
+        res.status(200).json({ msg: "OK", url: response.data.data.instrumentResponse.redirectInfo.url })
     } catch (error) {
         console.log("error in payment", error)
-        res.status(500).json({error : 'Failed to initiate payment'})
+        res.status(500).json({ error: 'Failed to initiate payment' })
     }
 
 });
@@ -185,15 +184,15 @@ app.post('/status', async (req, res) => {
     const merchantTransactionId = req.query.id;
 
     const keyIndex = 1
-    const string  = `/pg/v1/status/${MERCHANT_ID}/${merchantTransactionId}` + MERCHANT_KEY
+    const string = `/pg/v1/status/${MERCHANT_ID}/${merchantTransactionId}` + MERCHANT_KEY
     const sha256 = crypto.createHash('sha256').update(string).digest('hex')
     const checksum = sha256 + '###' + keyIndex
 
     const option = {
         method: 'GET',
-        url:`${MERCHANT_STATUS_URL}/${MERCHANT_ID}/${merchantTransactionId}`,
+        url: `${MERCHANT_STATUS_URL}/${MERCHANT_ID}/${merchantTransactionId}`,
         headers: {
-            accept : 'application/json',
+            accept: 'application/json',
             'Content-Type': 'application/json',
             'X-VERIFY': checksum,
             'X-MERCHANT-ID': MERCHANT_ID
@@ -201,9 +200,9 @@ app.post('/status', async (req, res) => {
     }
 
     axios.request(option).then((response) => {
-        if (response.data.success === true){
-            return res.redirect(successUrl)
-        }else{
+        if (response.data.success === true) {
+            return res.redirect(successUrl+"/"+merchantTransactionId)
+        } else {
             return res.redirect(failureUrl)
         }
     })
