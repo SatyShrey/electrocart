@@ -3,7 +3,6 @@ const express = require('express');
 const app = express();
 const cors = require('cors');
 const bcrypt = require('bcrypt')
-const path = require('path')
 const axios = require('axios');
 
 const { v4: uuidv4 } = require('uuid');
@@ -18,8 +17,7 @@ app.use(express.static('.'))
 app.use(express.json())
 
 //mongodb client
-const mongoClient = require('mongodb').MongoClient;
-//const mongoUrl = 'mongodb://localhost:27017/'
+const mongoClient = require('mongodb').MongoClient; //const mongoUrl = 'mongodb://localhost:27017/'
 const mongoUrl = 'mongodb+srv://sndsatya:QtAy7QbfwCnzUhvu@clustersnd.adfao0n.mongodb.net/'
 
 //default page
@@ -28,15 +26,14 @@ app.get('/', (req, res) => {
     res.end()
 })
 
-//send product array
-app.get('/products', (req, res) => {
-    const file = path.join(__dirname, 'products.js')
-    res.sendFile(file);
-    res.end()
-})
-
 mongoClient.connect(mongoUrl).then(clientObject => {
     const db = clientObject.db('electrokart');
+    //send product array
+    app.get('/products', (req, res) => {
+        db.collection('products').find({}).toArray().then((products)=>{
+            res.send(products);res.end()
+        })
+    })
     //create user
     app.post('/createuser', (req, res) => {
         db.collection('users').findOne({ email: req.body.email }).then(async (data) => {
@@ -106,6 +103,14 @@ mongoClient.connect(mongoUrl).then(clientObject => {
                 res.send(user); res.end();
             })
         })
+    });
+    //place orders
+    app.put('/placeorders/:id', (req, res) => {
+        db.collection('users').updateOne({ email: req.params.id }, { $set: { cartItems: [], orders: req.body } }).then(() => {
+            db.collection('users').findOne({ email: req.params.id }).then((user) => {
+                res.send(user); res.end();
+            })
+        })
     })
 
 })
@@ -125,14 +130,14 @@ const redirectUrl = "https://electrocart-0x3v.onrender.com/status"
 const successUrl = "https://electrocartatweb3.netlify.app/payment-success"
 const failureUrl = "https://electrocartatweb3.netlify.app/payment-failure"
 
-// const redirectUrl="http://localhost:6060/status";
-// const successUrl="http://localhost:5173/payment-success";
-// const failureUrl="http://localhost:5173/payment-failure";
+// const redirectUrl = "http://localhost:6060/status";
+// const successUrl = "http://localhost:5173/payment-success";
+// const failureUrl = "http://localhost:5173/payment-failure";
 
 
 app.post('/create-order', async (req, res) => {
 
-    const { name, mobileNumber, amount } = req.body;
+    const { name, mobileNumber, amount, email } = req.body;
     const orderId = uuidv4()
 
     //payment
@@ -142,7 +147,7 @@ app.post('/create-order', async (req, res) => {
         mobileNumber: mobileNumber,
         amount: amount * 100,
         merchantTransactionId: orderId,
-        redirectUrl: `${redirectUrl}/?id=${orderId}`,
+        redirectUrl: `${redirectUrl}/?id=${orderId}&email=${email}`,
         redirectMode: 'POST',
         paymentInstrument: {
             type: 'PAY_PAGE'
@@ -182,6 +187,7 @@ app.post('/create-order', async (req, res) => {
 
 app.post('/status', async (req, res) => {
     const merchantTransactionId = req.query.id;
+    const email = req.query.email
 
     const keyIndex = 1
     const string = `/pg/v1/status/${MERCHANT_ID}/${merchantTransactionId}` + MERCHANT_KEY
@@ -201,9 +207,19 @@ app.post('/status', async (req, res) => {
 
     axios.request(option).then((response) => {
         if (response.data.success === true) {
-            return res.redirect(successUrl+"/"+merchantTransactionId)
+            mongoClient.connect(mongoUrl).then((clientObject) => {
+                let db = clientObject.db('electrokart')
+                db.collection('users').findOne({ email: email }).then(async(user) => {
+                    let cartItems = await user.cartItems;
+                    cartItems.forEach(element => {
+                        element.orderId=uuidv4().toString()
+                    });
+                    db.collection('users').updateOne({ email: user.email }, { $set: { cartItems: [], orders: [...user.orders,...cartItems] } })
+                })
+            })
+            return res.redirect(successUrl + "/" + merchantTransactionId)
         } else {
-            return res.redirect(failureUrl+"/"+merchantTransactionId)
+            return res.redirect(failureUrl + "/" + merchantTransactionId)
         }
     })
 });
