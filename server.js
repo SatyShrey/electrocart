@@ -17,8 +17,9 @@ app.use(express.static('.'))
 app.use(express.json())
 
 //mongodb client
-const mongoClient = require('mongodb').MongoClient; //const mongoUrl = 'mongodb://localhost:27017/'
-const mongoUrl = 'mongodb+srv://sndsatya:QtAy7QbfwCnzUhvu@clustersnd.adfao0n.mongodb.net/'
+const mongoClient = require('mongodb').MongoClient; 
+const mongoUrl = 'mongodb://localhost:27017/'
+//const mongoUrl = 'mongodb+srv://sndsatya:QtAy7QbfwCnzUhvu@clustersnd.adfao0n.mongodb.net/'
 
 //default page
 app.get('/', (req, res) => {
@@ -77,6 +78,16 @@ mongoClient.connect(mongoUrl).then(clientObject => {
         })
     });
 
+    
+    //update address
+    app.put('/address/:id', (req, res) => {
+        db.collection('users').updateOne({ email: req.params.id }, { $set: req.body }).then(() => {
+            db.collection('users').findOne({ email: req.params.id }).then(user => {
+                res.send(user); res.end()
+            })
+        })
+    });
+
     //remove from cart
     app.put('/removefromcart/:uid/:pid', async (req, res) => {
         let cartItems = req.body
@@ -126,13 +137,13 @@ const MERCHANT_BASE_URL = "https://api-preprod.phonepe.com/apis/pg-sandbox/pg/v1
 const MERCHANT_STATUS_URL = "https://api-preprod.phonepe.com/apis/pg-sandbox/pg/v1/status"
 
 
-const redirectUrl = "https://electrocart-0x3v.onrender.com/status"
-const successUrl = "https://electrocartatweb3.netlify.app/payment-success"
-const failureUrl = "https://electrocartatweb3.netlify.app/payment-failure"
+// const redirectUrl = "https://electrocart-0x3v.onrender.com/status"
+// const successUrl = "https://electrocartatweb3.netlify.app/payment-success"
+// const failureUrl = "https://electrocartatweb3.netlify.app/payment-failure"
 
-// const redirectUrl = "http://localhost:6060/status";
-// const successUrl = "http://localhost:5173/payment-success";
-// const failureUrl = "http://localhost:5173/payment-failure";
+const redirectUrl = "http://localhost:6060/status";
+const successUrl = "http://localhost:5173/payment-success";
+const failureUrl = "http://localhost:5173/payment-failure";
 
 
 app.post('/create-order', async (req, res) => {
