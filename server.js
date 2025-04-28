@@ -16,8 +16,8 @@ app.use(express.json())
 
 //mongodb client
 const mongoClient = require('mongodb').MongoClient; 
-const mongoUrl = 'mongodb://localhost:27017/'
-//const mongoUrl = 'mongodb+srv://sndsatya:QtAy7QbfwCnzUhvu@clustersnd.adfao0n.mongodb.net/'
+//const mongoUrl = 'mongodb://localhost:27017/'
+const mongoUrl = 'mongodb+srv://sndsatya:QtAy7QbfwCnzUhvu@clustersnd.adfao0n.mongodb.net/'
 
 //default page
 app.get('/', (req, res) => {
@@ -135,13 +135,13 @@ const MERCHANT_BASE_URL = "https://api-preprod.phonepe.com/apis/pg-sandbox/pg/v1
 const MERCHANT_STATUS_URL = "https://api-preprod.phonepe.com/apis/pg-sandbox/pg/v1/status"
 
 
-// const redirectUrl = "https://electrocart-0x3v.onrender.com/status"
-// const successUrl = "https://electrocartatweb3.netlify.app/payment-success"
-// const failureUrl = "https://electrocartatweb3.netlify.app/payment-failure"
+const redirectUrl = "https://electrocart-0x3v.onrender.com/status"
+const successUrl = "https://electrocartatweb3.netlify.app/payment-success"
+const failureUrl = "https://electrocartatweb3.netlify.app/payment-failure"
 
-const redirectUrl = "http://localhost:6060/status";
-const successUrl = "http://localhost:5173/payment-success";
-const failureUrl = "http://localhost:5173/payment-failure";
+// const redirectUrl = "http://localhost:6060/status";
+// const successUrl = "http://localhost:5173/payment-success";
+// const failureUrl = "http://localhost:5173/payment-failure";
 
 
 app.post('/create-order', async (req, res) => {
@@ -184,7 +184,6 @@ app.post('/create-order', async (req, res) => {
     try {
 
         const response = await axios.request(option);
-        //console.log(response.data.data.instrumentResponse.redirectInfo.url)
         res.status(200).json({ msg: "OK", url: response.data.data.instrumentResponse.redirectInfo.url })
     } catch (error) {
         console.log("error in payment", error)
